@@ -67,9 +67,9 @@ public class drive extends WebPage
 		String rootUrl = fullUrl.substring(0, fullUrl.indexOf('/', fullUrl.indexOf('/')+2));
 
 		response.render(CssReferenceHeaderItem.forUrl(rootUrl + "/global.css"));
-		response.render(CssReferenceHeaderItem.forUrl(rootUrl + "/css/index.css"));
+		response.render(CssReferenceHeaderItem.forUrl(rootUrl + "/css/drive.css"));
 		response.render(JavaScriptReferenceHeaderItem.forUrl(rootUrl + "/global.js"));
-		response.render(JavaScriptReferenceHeaderItem.forUrl(rootUrl + "/js/index.js"));
+		response.render(JavaScriptReferenceHeaderItem.forUrl(rootUrl + "/js/drive.js"));
 		response.render(CssReferenceHeaderItem.forUrl(rootUrl + "/thirdtools/PGcalculator/free.min.css"));
 	}
 }

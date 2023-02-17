@@ -15,7 +15,6 @@
 			<p>It's drive page</p>
 
 			<div  id="drag_effect" class="upload_zone">
-				<input type="file" id="fileUploader" class="display_none" onchange="handleFiles(this.files)"/>
 				<div>
 					<table class="full_w">
 						<tbody>
@@ -27,12 +26,21 @@
 						</tbody>
 					</table>
 				</div>
-				<div id="upload_zone" class="full_h">
-					<table class="full_w">
-						<tbody id="show_zone">
-						</tbody>
-					</table>
-				</div>
+				
+				<label>
+					<input type="file" id="fileUploader" class="display_none" multiple="multiple" />
+
+					<div id="upload_zone" class="full_h">
+						<div id="noticeMessage">
+							<p>將檔案拖移至這裡以上傳</p>
+						</div>
+	
+						<table class="full_w">
+							<tbody id="show_zone">
+							</tbody>
+						</table>
+					</div>
+				</label>
 			</div>
 			
 		</div>
