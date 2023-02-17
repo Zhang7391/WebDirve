@@ -2,13 +2,6 @@
 
 .titlebar td {width: 25%;}
 
-
-@media only screen and (max-width: 576px)
-{
-	/* phone version code */
-	/* code... */
-}
-
 .full_h {
     height: 100%;
 }
@@ -36,4 +29,11 @@
 }
 .display_none {
     display: none;
+}
+
+
+@media only screen and (max-width: 576px)
+{
+	/* phone version code */
+	/* code... */
 }
