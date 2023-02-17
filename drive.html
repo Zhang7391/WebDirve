@@ -13,6 +13,28 @@
 			<wicket:container wicket:id="titlebar" />
 	
 			<p>It's drive page</p>
+
+			<div  id="drag_effect" class="upload_zone">
+				<input type="file" id="fileUploader" class="display_none" onchange="handleFiles(this.files)"/>
+				<div>
+					<table class="full_w">
+						<tbody>
+							<tr class="obj_tr">
+								<th class="obj_td">檔案名稱</th>
+								<th class="obj_td">日期</th>
+								<th class="obj_td">類型</th>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div id="upload_zone" class="full_h">
+					<table class="full_w">
+						<tbody id="show_zone">
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
 		</div>
 	</body>
 	
