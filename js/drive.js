@@ -17,6 +17,7 @@ window.addEventListener("DOMContentLoaded", () =>
 
     function dragenter(evented) 
 	{
+        if (!document.querySelector(".upload_failed").hidden) return;
         firstenter = evented.target;
         dropbox_effect.classList.add("upload_zone_enter");
 
@@ -48,9 +49,9 @@ window.addEventListener("DOMContentLoaded", () =>
             const file = files[i];
 
             let check = false;
-            for (let j=0; j < document.querySelectorAll("#filelist").length; j++)
+            for (let j = 0, fileList = document.querySelectorAll("#filelist"); j < fileList.length; j++)
             {
-                if (file["name"] === document.querySelectorAll("#filelist")[j].innerText){
+                if (file["name"] === fileList[j].innerText){
                     check = true;
                     break;
                 }
@@ -108,11 +109,10 @@ window.addEventListener("DOMContentLoaded", () =>
         content.textContent = text;
         content.setAttribute("id", "disposable");
         document.querySelector(".upload_failed").appendChild(content);
-        document.querySelector(".upload_failed").classList.remove("display_none");
+        document.querySelector(".upload_failed").hidden = false;
     }
 
     const failWindowButton = document.querySelector(".failed_btn");
-    const failWindowButtonClick = e => document.querySelector(".upload_failed").classList.add("display_none");
 
 	// true is capturing
 	// false is bubbling
@@ -121,5 +121,7 @@ window.addEventListener("DOMContentLoaded", () =>
     dropbox.addEventListener("dragover", dragover, false);
     dropbox.addEventListener("drop", drop, false);
 
-    failWindowButton.addEventListener("click", failWindowButtonClick, false);
+    failWindowButton.addEventListener("click", e => {
+        document.querySelector(".upload_failed").hidden = true;
+    }, false);
 });
