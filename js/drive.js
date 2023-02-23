@@ -41,6 +41,7 @@ window.addEventListener("DOMContentLoaded", () =>
 
 	function handleFiles(files)
 	{
+        if (!document.querySelector(".upload_failed").hidden) return;
 		document.querySelector("#upload").click();
 		document.querySelector("#noticeMessage").hidden = true;
 
