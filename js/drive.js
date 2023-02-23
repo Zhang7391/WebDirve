@@ -15,31 +15,32 @@ window.addEventListener("DOMContentLoaded", () =>
 
     let firstenter = null;
 
-    function dragenter(e) 
+    function dragenter(evented) 
 	{
-        firstenter = e.target;
+        firstenter = evented.target;
         dropbox_effect.classList.add("upload_zone_enter");
 
-        e.stopPropagation();
-        e.preventDefault();
+        evented.stopPropagation();
+        evented.preventDefault();
     }
 
-    function dragleave(e) 
+    function dragleave(evented) 
 	{
-        if (e.target === firstenter)
+        if(evented.target === firstenter)
 		{
             dropbox_effect.classList.remove("upload_zone_enter");
         }
     }
 
-    function dragover(e) 
+    function dragover(evented) 
 	{
-        e.stopPropagation();
-        e.preventDefault();
+        evented.stopPropagation();
+        evented.preventDefault();
     }
 
 	function handleFiles(files)
 	{
+		document.querySelector("#upload").click();
 		document.querySelector("#noticeMessage").hidden = true;
 
         for (let i = 0; files.length > i; i++) 
@@ -84,14 +85,16 @@ window.addEventListener("DOMContentLoaded", () =>
         }
     };
 
-    function drop(e) 
+    function drop(evented) 
 	{
-        e.stopPropagation();
-        e.preventDefault();
+        evented.preventDefault();
         dropbox_effect.classList.remove("upload_zone_enter");
 
-        const dt = e.dataTransfer;
-        const files = dt.files;
+		let files = evented.dataTransfer.files;
+
+		let list = new DataTransfer();
+		for(let x of files) list.items.add(x);
+		document.querySelector("#fileUploader").files = list.files;
 
         handleFiles(files);
     }

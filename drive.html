@@ -14,38 +14,42 @@
 	
 			<p>It's drive page</p>
 
-			<div  id="drag_effect" class="upload_zone">
-				<div>
-					<table class="full_w">
-						<tbody>
-							<tr class="obj_tr">
-								<th class="obj_td">檔案名稱</th>
-								<th class="obj_td">日期</th>
-								<th class="obj_td">類型</th>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				
-				<label>
-					<input type="file" id="fileUploader" class="display_none" multiple="multiple" />
-
-					<div id="upload_zone" class="full_h">
-						<div id="noticeMessage">
-							<p>將檔案拖移至這裡以上傳</p>
-						</div>
-	
+			<div id="drag_effect" class="upload_zone">
+				<form wicket:id="upload_zone" method="post" enctype="multipart/form-data">
+					<div>
 						<table class="full_w">
-							<tbody id="show_zone">
+							<tbody>
+								<tr class="obj_tr">
+									<th class="obj_td">檔案名稱</th>
+									<th class="obj_td">日期</th>
+									<th class="obj_td">類型</th>
+								</tr>
 							</tbody>
 						</table>
 					</div>
-				</label>
+
+					<input id="upload" type="submit" wicket:id="search" hidden />
+				
+					<label>
+						<input id="fileUploader" wicket:id="fileButton" class="display_none" type="file" multiple="multiple" />
+
+						<div id="upload_zone" class="full_h">
+							<div id="noticeMessage" hidden>
+								<p>將檔案拖移至這裡以上傳</p>
+							</div>
+	
+							<table class="full_w">
+								<tbody id="show_zone">
+								</tbody>
+							</table>
+						</div>
+					</label>
+				</form>
 				<div class="upload_failed display_none">
 					<button class="failed_btn">確定</button>
 				</div>
 			</div>
-			
+		
 		</div>
 	</body>
 	
