@@ -17,6 +17,7 @@ window.addEventListener("DOMContentLoaded", () =>
 
     function dragenter(evented) 
 	{
+        if (!document.querySelector(".upload_failed").hidden) return;
         firstenter = evented.target;
         dropbox_effect.classList.add("upload_zone_enter");
 
@@ -40,18 +41,36 @@ window.addEventListener("DOMContentLoaded", () =>
 
 	function handleFiles(files)
 	{
+        if (!document.querySelector(".upload_failed").hidden) return;
 		document.querySelector("#upload").click();
 		document.querySelector("#noticeMessage").hidden = true;
 
         for (let i = 0; files.length > i; i++) 
 		{
             const file = files[i];
+
+            let check = false;
+            for (let j = 0, fileList = document.querySelectorAll("#filelist"); j < fileList.length; j++)
+            {
+                if (file["name"] === fileList[j].innerText){
+                    check = true;
+                    break;
+                }
+            }
+            if (check)
+            {
+                check = false;
+                failWindow("檔案重複");
+                break;
+            }
+
             const tr = document.createElement("tr");
             tr.classList.add("obj_tr");
 
             const td = document.createElement("td");
             td.innerText = file["name"];
             td.classList.add("obj_td");
+            td.setAttribute("id", "filelist");
 
             const td2 = document.createElement("td");
             td2.innerText = "-";
@@ -82,10 +101,28 @@ window.addEventListener("DOMContentLoaded", () =>
         handleFiles(files);
     }
 
+    function failWindow(text)
+    {
+        for (let i=0; i<document.querySelectorAll("#disposable").length; i++) {
+            document.querySelectorAll("#disposable")[i].remove();
+        }
+        let content = document.createElement("div");
+        content.textContent = text;
+        content.setAttribute("id", "disposable");
+        document.querySelector(".upload_failed").appendChild(content);
+        document.querySelector(".upload_failed").hidden = false;
+    }
+
+    const failWindowButton = document.querySelector(".failed_btn");
+
 	// true is capturing
 	// false is bubbling
     dropbox.addEventListener("dragenter", dragenter, false);
     dropbox.addEventListener("dragleave", dragleave, false);
     dropbox.addEventListener("dragover", dragover, false);
     dropbox.addEventListener("drop", drop, false);
+
+    failWindowButton.addEventListener("click", e => {
+        document.querySelector(".upload_failed").hidden = true;
+    }, false);
 });
