@@ -90,7 +90,7 @@ public class drive extends WebPage
 						try
 						{
 							System.out.println("/mnt/" + file.getClientFileName());
-							field.getFileUpload().writeTo(new File("/mnt/" + file.getClientFileName()));
+							file.writeTo(new File("/mnt/" + file.getClientFileName()));
 						}
 						catch(Exception error) {error.printStackTrace();}
 					}

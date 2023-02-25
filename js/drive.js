@@ -3,6 +3,11 @@ window.addEventListener("DOMContentLoaded", () =>
 	if(document.querySelector("#show_zone").childNodes.length === 1)
 		document.querySelector("#noticeMessage").hidden = false;
 
+    document.querySelector(".failed_btn").addEventListener("click", error => 
+	{
+        document.querySelector(".upload_failed").hidden = true;
+    }, false);
+
     const dropbox = document.querySelector("#upload_zone");
     const dropbox_effect = document.querySelector("#drag_effect");
 
@@ -13,11 +18,13 @@ window.addEventListener("DOMContentLoaded", () =>
 		handleFiles(files);
 	});
 
+
     let firstenter = null;
 
     function dragenter(evented) 
 	{
         if (!document.querySelector(".upload_failed").hidden) return;
+
         firstenter = evented.target;
         dropbox_effect.classList.add("upload_zone_enter");
 
@@ -103,17 +110,19 @@ window.addEventListener("DOMContentLoaded", () =>
 
     function failWindow(text)
     {
-        for (let i=0; i<document.querySelectorAll("#disposable").length; i++) {
+        for (let i=0; i<document.querySelectorAll("#disposable").length; i++) 
+		{
             document.querySelectorAll("#disposable")[i].remove();
         }
+
         let content = document.createElement("div");
+
         content.textContent = text;
         content.setAttribute("id", "disposable");
+
         document.querySelector(".upload_failed").appendChild(content);
         document.querySelector(".upload_failed").hidden = false;
     }
-
-    const failWindowButton = document.querySelector(".failed_btn");
 
 	// true is capturing
 	// false is bubbling
@@ -121,8 +130,4 @@ window.addEventListener("DOMContentLoaded", () =>
     dropbox.addEventListener("dragleave", dragleave, false);
     dropbox.addEventListener("dragover", dragover, false);
     dropbox.addEventListener("drop", drop, false);
-
-    failWindowButton.addEventListener("click", e => {
-        document.querySelector(".upload_failed").hidden = true;
-    }, false);
 });
