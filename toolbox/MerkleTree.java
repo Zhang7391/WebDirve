@@ -274,4 +274,35 @@ public class MerkleTree
 
 		return new String(result.deleteCharAt(result.length()-1).append('}'));
 	}
+    
+    public static TreeNode createTree(String input) {
+        input = input.substring(1, input.length()-1);
+        String[] data = input.split(",");
+
+        TreeNode root = null;
+        if (data.length == 0) return root;
+
+        root = createTreeHelper(data, root, 0, null);
+        return root;
+    }
+    
+    public static TreeNode createTreeHelper(String[] data, TreeNode root, int i, TreeNode parent) {
+        if (i < data.length) {
+            root = new TreeNode(data[i]);
+            root.status = false;
+            if (i != 0) root.parent = parent;
+            root.left = createTreeHelper(data, root.left, 2 * i + 1, root);
+            root.right = createTreeHelper(data, root.right, 2 * i + 2, root);
+            if (data[i] == "") {
+                root.status = true;
+                TreeNode node = root;
+                while (root.parent != null) {
+                    root.parent.status = true;
+                    root = root.parent;
+                }
+                root = node;
+            }
+        }
+        return root;
+    }
 }
