@@ -40,6 +40,14 @@ public class MerkleTree
 
 	public MerkleTree() {}
 
+	public MerkleTree(String data)
+	{
+		this.root = this.createTree(data);
+
+		this.anchor = this.root;
+		this.findEmptyNode();
+	}
+
 	public boolean append(String checksum)
 	{
 		if(this.root == null) 
@@ -165,7 +173,7 @@ public class MerkleTree
 		{
 			if(this.DEBUG) System.out.println("anchor value: " + this.anchor.value);
 			
-			if(this.anchor == this.root) 
+			if(this.anchor == this.root && !this.root.left.status && !this.root.right.status) 
 			{
 				if(this.DEBUG) System.out.println("Match root");
 				break;
@@ -246,20 +254,6 @@ public class MerkleTree
 		}
 
 		return result; 
-	}
-
-	public void valueOf(String data) 
-	{
-		this.root = this.createTree(data);
-
-		TreeNode now = this.root;
-		while(now.left != null && now.right != null)
-		{
-			if(now.left.status) now = now.left;
-			else now = now.right;
-		}
-
-		this.anchor = now;
 	}
 
 	public String toString()
