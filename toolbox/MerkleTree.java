@@ -248,8 +248,24 @@ public class MerkleTree
 		return result; 
 	}
 
+	public void valueOf(String data) 
+	{
+		this.root = this.createTree(data);
+
+		TreeNode now = this.root;
+		while(now.left != null && now.right != null)
+		{
+			if(now.left.status) now = now.left;
+			else now = now.right;
+		}
+
+		this.anchor = now;
+	}
+
 	public String toString()
 	{
+		if(this.root == null) return "{}";
+
 		StringBuffer result = new StringBuffer("{");
 
 		LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
@@ -275,9 +291,11 @@ public class MerkleTree
 		return new String(result.deleteCharAt(result.length()-1).append('}'));
 	}
     
-    public static TreeNode createTree(String input) {
-        input = input.substring(1, input.length()-1);
+    private TreeNode createTree(String input) 
+	{
         String[] data = input.split(",");
+		data[0] = data[0].substring(1, data[0].length());
+		data[data.length-1] = data[data.length-1].substring(0, data[data.length-1].length()-1);
 
         TreeNode root = null;
         if (data.length == 0) return root;
@@ -286,17 +304,21 @@ public class MerkleTree
         return root;
     }
     
-    public static TreeNode createTreeHelper(String[] data, TreeNode root, int i, TreeNode parent) {
-        if (i < data.length) {
+    private TreeNode createTreeHelper(String[] data, TreeNode root, int i, TreeNode parent) 
+	{
+        if (i < data.length) 
+		{
             root = new TreeNode(data[i]);
             root.status = false;
             if (i != 0) root.parent = parent;
             root.left = createTreeHelper(data, root.left, 2 * i + 1, root);
             root.right = createTreeHelper(data, root.right, 2 * i + 2, root);
-            if (data[i] == "") {
+            if (data[i] == "") 
+			{
                 root.status = true;
                 TreeNode node = root;
-                while (root.parent != null) {
+                while (root.parent != null) 
+				{
                     root.parent.status = true;
                     root = root.parent;
                 }
