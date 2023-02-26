@@ -307,7 +307,7 @@ public class MerkleTree
             if (i != 0) root.parent = parent;
             root.left = createTreeHelper(data, root.left, 2 * i + 1, root);
             root.right = createTreeHelper(data, root.right, 2 * i + 2, root);
-            if (data[i] == "") 
+            if (data[i].isEmpty()) 
 			{
                 root.status = true;
                 TreeNode node = root;
