@@ -1,7 +1,9 @@
 package taiwan.webpage;
 
 import java.io.File;
+import java.math.BigInteger;
 import org.apache.wicket.request.Url;
+import java.nio.charset.StandardCharsets;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,6 +22,8 @@ import taiwan.webpage.operator;
 import taiwan.toolbox.LoginCheck;
 import taiwan.formwork.html.Titlebar;
 import taiwan.formwork.html.Copyright;
+import taiwan.operate.file.FileSpliter;
+import taiwan.operate.file.structure.SplitInformation;
 
 
 @MountPath("/drive")
@@ -83,16 +87,26 @@ public class drive extends WebPage
 				@Override
 				protected void onSubmit(AjaxRequestTarget target)
 				{
-					System.out.println("Recive Files.");
-
-					for(FileUpload file : field.getFileUploads())
+					if(field.getFileUploads().size() != -1)
 					{
-						try
+						System.out.println("Recive Files.");
+						
+						for(FileUpload file : field.getFileUploads())
 						{
-							System.out.println("/mnt/" + file.getClientFileName());
-							file.writeTo(new File("/mnt/" + file.getClientFileName()));
+							SplitInformation setting = new SplitInformation();
+							setting.PIECE_NUMBER = 3;
+							setting.FILENAME = new BigInteger(1, file.getDigest("SHA-224")).toString(16) + "_";
+
+							FileSpliter fileSpliter = new FileSpliter(setting); 
+
+							try
+							{
+								File tempFile = file.writeToTempFile();
+								fileSpliter.setup(tempFile);
+								tempFile.delete();
+							}
+							catch(Exception error) {error.printStackTrace();}
 						}
-						catch(Exception error) {error.printStackTrace();}
 					}
 				}
 			});
