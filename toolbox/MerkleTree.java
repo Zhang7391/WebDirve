@@ -1,6 +1,7 @@
 package taiwan.toolbox;
 
 import java.lang.Math;
+import java.util.HashMap;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.lang.StringBuffer;
@@ -32,11 +33,17 @@ public class MerkleTree
 		}
 	}
 
+	// lock
+	private final Object treeReading = new Object();
+
+	private final HashMap<String, TreeNode> nodePlace = new HashMap<String, TreeNode>();
+
 	private TreeNode root = null;
 	private TreeNode anchor = null;
+	private TreeNode branch = null;
 
 	private int treedeep = 0;
-	private int treenodeNum = 0;
+//	private int treenodeNum = 0;
 
 	public MerkleTree() {}
 
@@ -50,119 +57,232 @@ public class MerkleTree
 
 	public boolean append(String checksum)
 	{
-		if(this.root == null) 
+		synchronized(treeReading)
 		{
-			if(this.DEBUG) System.out.println("Init this tree"); 
-
-			this.treedeep += 1;
-			this.treenodeNum += 1;
-
-			this.root = new TreeNode(checksum);
-			this.root.value = checksum;
-			this.root.status = false;
-
-			this.anchor = this.root;
-
-			return true;
-		}
-
-		if(this.anchor == this.root)
-		{
-			if(this.DEBUG) System.out.println("Add this tree deep"); 
-
-			TreeNode oldRoot = this.root;
-			
-			this.root = null;
-			this.root = new TreeNode();
-			this.root.left = oldRoot;
-
-			int deep = 1;
-			oldRoot.status = false;
-			oldRoot.parent = this.root;
-
-			TreeNode newNode = new TreeNode("", this.root);
-			this.root.right = newNode;
-
-			LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
-			nodes.addLast(newNode);
-
-			while(this.treedeep > deep)
+			if(this.root == null) 
 			{
-				int counter = nodes.size();
+				this.treedeep += 1;
+//				this.treenodeNum += 1;
 
-				while(counter != 0)
+				this.root = new TreeNode(checksum);
+				this.root.value = checksum;
+				this.root.status = false;
+
+				this.anchor = this.root;
+				this.nodePlace.put(checksum, this.anchor);
+
+				return true;
+			}
+
+			if(this.anchor == this.root)
+			{
+				TreeNode oldRoot = this.root;
+
+				this.root = null;
+				this.root = new TreeNode();
+				this.root.left = oldRoot;
+				
+				if(this.branch != null)
 				{
-					TreeNode now = nodes.pollFirst();
-					now.left = new TreeNode("", now);
-					now.right = new TreeNode("", now);
+					this.root.right = this.branch;
+					this.branch.parent = this.root;
 
-					nodes.addLast(now.left);
-					nodes.addLast(now.right);
+					this.anchor = this.root;
+					this.findEmptyNode();
 
-					counter -= 1;
+					this.nodePlace.put(checksum, this.anchor);
+					this.changeNodeAndBubbling(this.anchor, checksum);
+
+					this.findEmptyNode();
+
+					this.branch = null;
+					this.treedeep += 1;
+
+					return true;
+				}
+			
+
+				int deep = 1;
+				oldRoot.status = false;
+				oldRoot.parent = this.root;
+
+				TreeNode newNode = new TreeNode("", this.root);
+				this.root.right = newNode;
+
+				LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
+				nodes.addLast(newNode);
+
+				while(this.treedeep > deep)
+				{
+					int counter = nodes.size();
+
+					while(counter != 0)
+					{
+						TreeNode now = nodes.pollFirst();
+						now.left = new TreeNode("", now);
+						now.right = new TreeNode("", now);
+
+						nodes.addLast(now.left);
+						nodes.addLast(now.right);
+
+						counter -= 1;
+					}
+
+					deep += 1;
+				}
+				nodes.clear();
+
+				while(newNode.left != null) newNode = newNode.left;
+				newNode.value = checksum;
+				newNode.status = false;
+
+				this.anchor = newNode;
+				this.nodePlace.put(checksum, this.anchor);
+
+				while(newNode.parent != this.root)
+				{
+					newNode = newNode.parent;
+//					newNodw.right.value = newNode.left.value;
+					newNode.value = this.sha224(newNode.left.value + newNode.left.value);
 				}
 
-				deep += 1;
+				this.root.value = sha224(this.root.left.value + this.root.right.value);
+
+				this.findEmptyNode();
+			
+				this.treedeep += 1;
+//				this.treenodeNum += 1;
+
+				return true;
 			}
-			nodes.clear();
 
-			while(newNode.left != null) newNode = newNode.left;
-			newNode.value = checksum;
-			newNode.status = false;
+			this.anchor.value = checksum;
+			this.anchor.status = false;
 
-			this.anchor = newNode;
+			this.nodePlace.put(checksum, this.anchor);
 
-			while(newNode.parent != this.root)
+			TreeNode now = this.anchor;
+			now = now.parent;
+
+			while(now != null)
 			{
-				newNode = newNode.parent;
-//				newNodw.right.value = newNode.left.value;
-				newNode.value = this.sha224(newNode.left.value + newNode.left.value);
+				if(now.right.value.length() != 0) now.value = sha224(now.left.value + now.right.value);
+				else now.value = sha224(now.left.value + now.left.value);
+			
+				now = now.parent;	
 			}
-
-			this.root.value = sha224(this.root.left.value + this.root.right.value);
 
 			this.findEmptyNode();
-			
-			this.treedeep += 1;
-			this.treenodeNum += 1;
+//			this.treenodeNum += 1;
 
 			return true;
 		}
-
-		if(this.DEBUG) System.out.println("Fill blank"); 
-
-		this.anchor.value = checksum;
-		this.anchor.status = false;
-
-		TreeNode now = this.anchor;
-		now = now.parent;
-
-		while(now != null)
-		{
-			if(this.DEBUG) System.out.println("now value: " + now.value);
-
-			if(now.right.value.length() != 0) now.value = sha224(now.left.value + now.right.value);
-			else now.value = sha224(now.left.value + now.left.value);
-			
-			now = now.parent;
-			
-		}
-		if(this.DEBUG) System.out.println("now value: " + now);
-
-		this.findEmptyNode();
-		this.treenodeNum += 1;
-
-		return true;
 	}
 
-	private void findEmptyNode()
+	public TreeNode remove(String checksum)
 	{
-		if(this.DEBUG) 
+		synchronized(treeReading)
 		{
-			System.out.println("finding empty node...");
-			System.out.println("anchor value: " + this.anchor.value);
+			TreeNode delete = this.nodePlace.remove(checksum);
+			if(delete == null) return null;
+
+//			this.treenodeNum -= 1;
+
+			if(this.nodePlace.size() == 0)
+			{
+				this.root = null;
+				this.anchor = null;
+				this.branch = null;
+
+				this.treedeep = 0;
+
+				this.nodePlace.clear();
+
+				return delete;
+			}
+
+			if(this.nodePlace.size() == (int)Math.pow(2, 31 - Integer.numberOfLeadingZeros(this.nodePlace.size())))
+			{
+				this.treedeep -= 1;
+				this.changeNodeAndBubbling(delete, "");
+
+				this.branch = this.root.right;
+				this.branch.parent = null;
+
+				this.anchor = this.root.left;	
+				TreeNode move = this.root.right;
+
+				this.findEmptyNode(this.root.left);
+
+				while(this.anchor != this.root.left)
+				{
+					while(move.right != null && move.left != null)
+					{
+						if(move.left.value.isEmpty()) move = move.right;
+						else move = move.left;
+					}
+
+					this.changeNodeAndBubbling(this.anchor, move.value);
+
+					this.changeNodeAndBubbling(move, "");
+
+					move = this.root.right;
+					this.findEmptyNode(this.root.left);
+				}
+
+				this.root = this.root.left;
+				return delete;
+			}
+
+			this.changeNodeAndBubbling(delete, "");
+
+			this.anchor = this.root;
+			this.findEmptyNode();
+		
+			return delete;
+		}
+	}
+
+	private void changeNodeAndBubbling(TreeNode change, String value)
+	{
+		change.value = value;
+		change.status = value.isEmpty();
+		change = change.parent;
+
+		while(change != null)
+		{
+			change.status = (change.left.status || change.right.status);
+
+			if(change.right.value.isEmpty() && change.left.value.isEmpty())
+			{
+				change.value = "";
+				change = change.parent;
+				continue;
+			}
+
+			if(change.right.value.isEmpty())
+			{
+				change.value = this.sha224(change.left.value + change.left.value);
+				change = change.parent;
+				continue;
+			}
+
+			if(change.left.value.isEmpty())
+			{
+				change.value = this.sha224(change.right.value + change.right.value);
+				change = change.parent;
+				continue;
+			}
+
+			change.value = this.sha224(change.left.value + change.right.value);	
+			change = change.parent;
 		}
 
+	}
+
+	private void findEmptyNode() {this.findEmptyNode(this.root);}
+	private void findEmptyNode(TreeNode top)
+	{
 		if(this.anchor.right == null && this.anchor.left == null)
 		{
 			this.anchor.status = false;
@@ -171,13 +291,7 @@ public class MerkleTree
 
 		while(this.anchor.right != null && this.anchor.left != null)
 		{
-			if(this.DEBUG) System.out.println("anchor value: " + this.anchor.value);
-			
-			if(this.anchor == this.root && !this.root.left.status && !this.root.right.status) 
-			{
-				if(this.DEBUG) System.out.println("Match root");
-				break;
-			}
+			if(this.anchor == top && !top.left.status && !top.right.status) break;
 
 			if(this.anchor.left.status)
 			{
@@ -194,13 +308,6 @@ public class MerkleTree
 			this.anchor.status = false;
 			this.anchor = this.anchor.parent;
 		}
-
-		if(this.DEBUG) System.out.println("anchor value: " + this.anchor.value);
-	}
-
-	public boolean remove(String checksum)
-	{
-		return true;
 	}
 
 	private String sha224(String input)
@@ -224,65 +331,79 @@ public class MerkleTree
 		catch(NoSuchAlgorithmException e) {throw new RuntimeException(e);}*/
 	}
 
-	public int size() {return this.treenodeNum;}
+	public int size() 
+	{
+		synchronized(treeReading)
+		{
+			return this.nodePlace.size();
+		}
+	}
 
 	public LinkedList<LinkedList<String>> toLinkedList()
 	{
-		LinkedList<LinkedList<String>> result = new LinkedList<LinkedList<String>>();
+		if(this.root == null) return null;
 
-		LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
-		nodes.addLast(this.root);
-
-		while(!nodes.isEmpty())
+		synchronized(treeReading)
 		{
-			int counter = nodes.size();
-			LinkedList<String> temp = new LinkedList<String>();
+			LinkedList<LinkedList<String>> result = new LinkedList<LinkedList<String>>();
 
-			while(counter != 0)
+			LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
+			nodes.addLast(this.root);
+
+			while(!nodes.isEmpty())
 			{
-				TreeNode node = nodes.pollFirst();
+				int counter = nodes.size();
+				LinkedList<String> temp = new LinkedList<String>();
 
-				temp.addLast(node.value);
+				while(counter != 0)
+				{
+					TreeNode node = nodes.pollFirst();
 
-				if(node.left != null) nodes.addLast(node.left);
-				if(node.right != null) nodes.addLast(node.right);
+					temp.addLast(node.value);
 
-				counter -= 1;
+					if(node.left != null) nodes.addLast(node.left);
+					if(node.right != null) nodes.addLast(node.right);
+
+					counter -= 1;
+				}
+
+				result.addLast(temp);
 			}
-
-			result.addLast(temp);
+		
+			return result; 
 		}
-
-		return result; 
 	}
 
 	public String toString()
 	{
 		if(this.root == null) return "{}";
 
-		StringBuffer result = new StringBuffer("{");
-
-		LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
-		nodes.addLast(this.root);
-
-		while(!nodes.isEmpty())
+		synchronized(treeReading)
 		{
-			int counter = nodes.size();
+			StringBuffer result = new StringBuffer("{");
+		
+			LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
+			nodes.addLast(this.root);
 
-			while(counter != 0)
+			while(!nodes.isEmpty())
 			{
-				TreeNode node = nodes.pollFirst();
+				int counter = nodes.size();
 
-				result.append(node.value + ",");
+				while(counter != 0)
+				{
+					TreeNode node = nodes.pollFirst();
 
-				if(node.left != null) nodes.addLast(node.left);
-				if(node.right != null) nodes.addLast(node.right);
+					result.append(node.value + ",");
 
-				counter -= 1;
+					if(node.left != null) nodes.addLast(node.left);
+					if(node.right != null) nodes.addLast(node.right);
+
+					counter -= 1;
+				}
 			}
+		
+			return new String(result.deleteCharAt(result.length()-1).append('}'));
 		}
-
-		return new String(result.deleteCharAt(result.length()-1).append('}'));
 	}
     
     private TreeNode createTree(String input) 

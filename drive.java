@@ -87,7 +87,7 @@ public class drive extends WebPage
 				@Override
 				protected void onSubmit(AjaxRequestTarget target)
 				{
-					if(field.getFileUploads().size() != -1)
+					if(field.getFileUploads().size() != 0)
 					{
 						System.out.println("Recive Files.");
 						
