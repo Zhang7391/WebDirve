@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.util.LinkedList;
 import java.lang.StringBuffer;
 import java.security.MessageDigest;
+import org.apache.commons.lang3.StringUtils;
 import java.security.NoSuchAlgorithmException;
 
 
@@ -57,7 +58,7 @@ public class MerkleTree
 
 	public boolean append(String checksum)
 	{
-		synchronized(treeReading)
+		synchronized(this.treeReading)
 		{
 			if(this.root == null) 
 			{
@@ -181,7 +182,7 @@ public class MerkleTree
 
 	public TreeNode remove(String checksum)
 	{
-		synchronized(treeReading)
+		synchronized(this.treeReading)
 		{
 			TreeNode delete = this.nodePlace.remove(checksum);
 			if(delete == null) return null;
@@ -331,11 +332,39 @@ public class MerkleTree
 		catch(NoSuchAlgorithmException e) {throw new RuntimeException(e);}*/
 	}
 
+	public boolean compareTo(MerkleTree compare)
+	{
+		if(this.root == null && compare == null) return true;
+		if(this.root == null || compare == null) return false;
+
+		if(this.nodePlace.size() != compare.size()) return false;
+
+		return (this.root.value.compareTo(compare.rootNodeValue()) == 0);
+	}
+
+	public boolean compareTo(String compare)
+	{
+		int counter = StringUtils.countMatches(compare, ',');
+		counter += 1;
+
+		if(((int)Math.pow(2, this.treedeep) - 1) != counter) return false;
+
+		return (this.root.value.compareTo(compare.substring(1, compare.indexOf(','))) == 0);
+	}
+
 	public int size() 
 	{
-		synchronized(treeReading)
+		synchronized(this.treeReading)
 		{
 			return this.nodePlace.size();
+		}
+	}
+
+	public String rootNodeValue()
+	{
+		synchronized(this.treeReading)
+		{
+			return this.root.value;
 		}
 	}
 
@@ -343,7 +372,7 @@ public class MerkleTree
 	{
 		if(this.root == null) return null;
 
-		synchronized(treeReading)
+		synchronized(this.treeReading)
 		{
 			LinkedList<LinkedList<String>> result = new LinkedList<LinkedList<String>>();
 
@@ -378,7 +407,7 @@ public class MerkleTree
 	{
 		if(this.root == null) return "{}";
 
-		synchronized(treeReading)
+		synchronized(this.treeReading)
 		{
 			StringBuffer result = new StringBuffer("{");
 		
@@ -405,7 +434,7 @@ public class MerkleTree
 			return new String(result.deleteCharAt(result.length()-1).append('}'));
 		}
 	}
-    
+
     private TreeNode createTree(String input) 
 	{
         String[] data = input.split(",");
@@ -418,7 +447,7 @@ public class MerkleTree
         root = createTreeHelper(data, root, 0, null);
         return root;
     }
-    
+
     private TreeNode createTreeHelper(String[] data, TreeNode root, int i, TreeNode parent) 
 	{
         if (i < data.length) 
