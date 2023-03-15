@@ -2,12 +2,15 @@ package taiwan.toolbox;
 
 import java.lang.Math;
 import java.util.HashMap;
+import java.util.Objects;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.lang.StringBuffer;
 import java.security.MessageDigest;
 import org.apache.commons.lang3.StringUtils;
 import java.security.NoSuchAlgorithmException;
+
+import taiwan.toolbox.MerkleTreeFromatException;
 
 
 public class MerkleTree
@@ -44,7 +47,10 @@ public class MerkleTree
 	private TreeNode branch = null;
 
 	private int treedeep = 0;
-//	private int treenodeNum = 0;
+
+	// error message
+	private final String parsedFail = "Unknow merkle tree";
+	private final String startOrEnd = "Must start with \'{\' and end with \'}\'";
 
 	public MerkleTree() {}
 
@@ -334,16 +340,38 @@ public class MerkleTree
 
 	public boolean compareTo(MerkleTree compare)
 	{
-		if(this.root == null && compare == null) return true;
-		if(this.root == null || compare == null) return false;
+		if(this.root == null && compare.size() == 0) return true;
+		if(this.root == null || compare.size() == 0) return false;
 
 		if(this.nodePlace.size() != compare.size()) return false;
 
 		return (this.root.value.compareTo(compare.rootNodeValue()) == 0);
 	}
 
-	public boolean compareTo(String compare)
+	public boolean compareTo(String compare) throws MerkleTreeFromatException
 	{
+		if(this.root == null || compare == null) return false;
+
+		if(compare.isEmpty())
+		{
+			if(this.nodePlace.size() == 0) return true;
+			return false;
+		}
+
+		if(compare.length() == 1) throw new MerkleTreeFromatException(this.parsedFail);
+
+		if(compare.length() == 2)
+		{
+			if(compare.compareTo("{}") != 0) 
+				throw new MerkleTreeFromatException(this.startOrEnd);
+			
+			if(this.nodePlace.size() == 0) return true;
+			return false;
+		}
+
+		if(compare.charAt(0) != '{' || compare.charAt(compare.length()-1) != '}')
+			throw new MerkleTreeFromatException(this.startOrEnd);
+
 		int counter = StringUtils.countMatches(compare, ',');
 		counter += 1;
 
