@@ -465,6 +465,7 @@ public class MerkleTree
 
     private TreeNode createTree(String input) 
 	{
+        if (input.isEmpty()) input = "{}";
         String[] data = input.split(",");
 		data[0] = data[0].substring(1, data[0].length());
 		data[data.length-1] = data[data.length-1].substring(0, data[data.length-1].length()-1);
