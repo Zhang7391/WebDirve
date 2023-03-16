@@ -471,6 +471,7 @@ public class MerkleTree
         String[] data = input.split(",");
 		data[0] = data[0].substring(1, data[0].length());
 		data[data.length-1] = data[data.length-1].substring(0, data[data.length-1].length()-1);
+		this.treedeep = deep(data.length);
 
         if (data.length == 0) return root;
 
@@ -501,4 +502,15 @@ public class MerkleTree
         }
         return root;
     }
+
+	private int deep(int num)
+	{
+		int deep = 0;
+		while (num > 0)
+		{
+			deep++;
+			num >>= 1;
+		}
+		return deep;
+	}
 }
