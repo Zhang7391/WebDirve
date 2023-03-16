@@ -290,8 +290,12 @@ public class MerkleTree
 	private void findEmptyNode() {this.findEmptyNode(this.root);}
 	private void findEmptyNode(TreeNode top)
 	{
+		if(this.anchor == null || top == null) return;
+
 		if(this.anchor.right == null && this.anchor.left == null)
 		{
+			if(this.anchor == this.root) return;
+
 			this.anchor.status = false;
 			this.anchor = this.anchor.parent;
 		}
