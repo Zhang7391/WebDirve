@@ -469,8 +469,11 @@ public class MerkleTree
         if (input.isEmpty()) return null;
 
         String[] data = input.split(",");
-		data[0] = data[0].substring(1, data[0].length());
-		data[data.length-1] = data[data.length-1].substring(0, data[data.length-1].length()-1);
+		if (data[0].charAt(0) == '{')  data[0] = data[0].substring(1, data[0].length());
+		else throw new MerkleTreeFromatException(this.startOrEnd);
+		String lastData = data[data.length-1];
+		if (lastData.charAt(lastData.length()-1) == '}') data[data.length-1] = lastData.substring(0, lastData.length()-1);
+		else throw new MerkleTreeFromatException(this.startOrEnd);
 		this.treedeep = deep(data.length);
 
         root = createTreeHelper(data, root, 0, null);
