@@ -473,8 +473,6 @@ public class MerkleTree
 		data[data.length-1] = data[data.length-1].substring(0, data[data.length-1].length()-1);
 		this.treedeep = deep(data.length);
 
-        if (data.length == 0) return root;
-
         root = createTreeHelper(data, root, 0, null);
         return root;
     }
