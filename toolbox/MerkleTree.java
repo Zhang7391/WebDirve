@@ -500,6 +500,7 @@ public class MerkleTree
                 }
                 root = node;
             }
+			if (root.left == null && root.right == null && !root.value.isEmpty()) this.nodePlace.put(root.value, root);
         }
         return root;
     }
