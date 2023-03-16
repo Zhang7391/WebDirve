@@ -469,12 +469,16 @@ public class MerkleTree
 
     private TreeNode createTree(String input) 
 	{
-        String[] data = input.split(",");
-		data[0] = data[0].substring(1, data[0].length());
-		data[data.length-1] = data[data.length-1].substring(0, data[data.length-1].length()-1);
-
         TreeNode root = null;
-        if (data.length == 0) return root;
+        if (input.isEmpty()) return null;
+
+        String[] data = input.split(",");
+		if (data[0].charAt(0) == '{')  data[0] = data[0].substring(1, data[0].length());
+		else throw new MerkleTreeFromatException(this.startOrEnd);
+		String lastData = data[data.length-1];
+		if (lastData.charAt(lastData.length()-1) == '}') data[data.length-1] = lastData.substring(0, lastData.length()-1);
+		else throw new MerkleTreeFromatException(this.startOrEnd);
+		this.treedeep = deep(data.length);
 
         root = createTreeHelper(data, root, 0, null);
         return root;
@@ -500,7 +504,19 @@ public class MerkleTree
                 }
                 root = node;
             }
+			if (root.left == null && root.right == null && !root.value.isEmpty()) this.nodePlace.put(root.value, root);
         }
         return root;
     }
+
+	private int deep(int num)
+	{
+		int deep = 0;
+		while (num > 0)
+		{
+			deep++;
+			num >>= 1;
+		}
+		return deep;
+	}
 }
