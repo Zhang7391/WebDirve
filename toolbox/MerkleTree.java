@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 import org.apache.commons.lang3.StringUtils;
 import java.security.NoSuchAlgorithmException;
 
-import taiwan.toolbox.MerkleTreeFromatException;
+import taiwan.toolbox.MerkleTreeFormatException;
 
 
 public class MerkleTree
@@ -352,7 +352,7 @@ public class MerkleTree
 		return (this.root.value.compareTo(compare.rootNodeValue()) == 0);
 	}
 
-	public boolean compareTo(String compare) throws MerkleTreeFromatException
+	public boolean compareTo(String compare) throws MerkleTreeFormatException
 	{
 		if(this.root == null || compare == null) return false;
 
@@ -362,19 +362,19 @@ public class MerkleTree
 			return false;
 		}
 
-		if(compare.length() == 1) throw new MerkleTreeFromatException(this.parsedFail);
+		if(compare.length() == 1) throw new MerkleTreeFormatException(this.parsedFail);
 
 		if(compare.length() == 2)
 		{
 			if(compare.compareTo("{}") != 0) 
-				throw new MerkleTreeFromatException(this.startOrEnd);
+				throw new MerkleTreeFormatException(this.startOrEnd);
 			
 			if(this.nodePlace.size() == 0) return true;
 			return false;
 		}
 
 		if(compare.charAt(0) != '{' || compare.charAt(compare.length()-1) != '}')
-			throw new MerkleTreeFromatException(this.startOrEnd);
+			throw new MerkleTreeFormatException(this.startOrEnd);
 
 		int counter = StringUtils.countMatches(compare, ',');
 		counter += 1;
@@ -474,10 +474,10 @@ public class MerkleTree
 
         String[] data = input.split(",");
 		if (data[0].charAt(0) == '{')  data[0] = data[0].substring(1, data[0].length());
-		else throw new MerkleTreeFromatException(this.startOrEnd);
+		else throw new MerkleTreeFormatException(this.startOrEnd);
 		String lastData = data[data.length-1];
 		if (lastData.charAt(lastData.length()-1) == '}') data[data.length-1] = lastData.substring(0, lastData.length()-1);
-		else throw new MerkleTreeFromatException(this.startOrEnd);
+		else throw new MerkleTreeFormatException(this.startOrEnd);
 		this.treedeep = deep(data.length);
 
         root = createTreeHelper(data, root, 0, null);
